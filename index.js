@@ -1,38 +1,38 @@
-const express = require('express');
-const app = express();
+const express = require('express')
+const app = express()
 // const data = require('./data');
 var morgan = require('morgan')
 const cors = require('cors')
 const Person = require('./models/person')
-require('dotenv').config();
+require('dotenv').config()
 
 app.use(cors())
 app.use(express.static('dist'))
 
 const unknownEndpoint = (request, response) => {
-  response.status(404).send({ error: 'unknown endpoint' });
+  response.status(404).send({ error: 'unknown endpoint' })
 }
 
 morgan.token('body', (request) => JSON.stringify(request.body))
 
-const postMorgan = morgan(':method :url :status :res[content-length] - :response-time ms :body');
+// const postMorgan = morgan(':method :url :status :res[content-length] - :response-time ms :body')
 
-app.use(express.json());
+app.use(express.json())
 // app.use(morgan('tiny'))
 
-const generateId = () => {
-  return Math.floor(Math.random() * 1000000);
-}
+// const generateId = () => {
+//   return Math.floor(Math.random() * 1000000)
+// }
 
 app.get('/', (request, response) => {
-  response.send('<h1>Hello World!</h1>');
-});
+  response.send('<h1>Hello World!</h1>')
+})
 
 app.get('/persons', (request, response) => {
   Person.find({}).then(persons => {
     response.json(persons)
   })
-});
+})
 
 app.get('/persons/:id', (request, response, next) => {
   Person.findById(request.params.id)
@@ -48,20 +48,20 @@ app.get('/persons/:id', (request, response, next) => {
 })
 
 app.delete('/persons/:id', (request, response) => {
-  const id = request.params.id;
+  const id = request.params.id
 
   Person.findByIdAndDelete(id)
     .then(deletedPerson => {
       if (deletedPerson) {
-        response.status(204).end();
+        response.status(204).end()
       } else {
-        response.status(404).json({ error: 'Person not found' });
+        response.status(404).json({ error: 'Person not found' })
       }
     })
-    .catch(error => {
-      response.status(500).json({ error: 'Internal Server Error' });
-    });
-});
+    .catch(() => {
+      response.status(500).json({ error: 'Internal Server Error' })
+    })
+})
 
 // app.get('/info', (request, response) => {
 //   const len = data.length;
@@ -69,7 +69,7 @@ app.delete('/persons/:id', (request, response) => {
 //   response.send(`There are ${len} entries in the data. <br/> ${localTime}`);
 // });
 
-app.post('/persons', (request, response, next) =>
+app.post('/persons', (request, response) =>
 {
   const body = request.body
 
@@ -97,11 +97,11 @@ app.post('/persons', (request, response, next) =>
     {
       if (err.name === 'ValidationError')
       {
-        const errors = Object.values(err.errors).map(error => error.message);
-        return response.status(400).json({ error: errors.join(', ') });
+        const errors = Object.values(err.errors).map(error => error.message)
+        return response.status(400).json({ error: errors.join(', ') })
       } else
       {
-        return response.status(500).json({ error: 'Internal Server Error' });
+        return response.status(500).json({ error: 'Internal Server Error' })
       }
     })
 })
@@ -143,5 +143,5 @@ app.use(errorHandler)
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+  console.log(`Server running on port ${PORT}`)
+})
