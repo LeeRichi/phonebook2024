@@ -2,7 +2,7 @@
 # Content-Type: application/json
 
 # {
-#     "name": "test",
+#     "name": "hi2",
 #     "number": "78"
 # }
 
@@ -16,6 +16,6 @@ PUT http://localhost:3001/persons/65fc4c2c36599f693391dcd4
 Content-Type: application/json
 
 {
-    "name": "new test",
+    "name": "put",
     "number": "7878"
 }

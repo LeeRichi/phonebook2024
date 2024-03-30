@@ -69,33 +69,41 @@ app.delete('/persons/:id', (request, response) => {
 //   response.send(`There are ${len} entries in the data. <br/> ${localTime}`);
 // });
 
-app.post('/persons', (request, response) => {
+app.post('/persons', (request, response, next) =>
+{
   const body = request.body
 
-  const existingName = findb
-  if (body.number === undefined) {
+  if (body.number === undefined)
+  {
     return response.status(400).json({ error: 'number missing' })
   }
 
-  if (body.name === undefined) {
+  if (body.name === undefined)
+  {
     return response.status(400).json({ error: 'name missing' })
   }
 
-  // if(body.name )
-
-  // const person = new Person({
-  //   name: body.name,
-  //   number: body.number
-  // })
+  const person = new Person({
+    name: body.name,
+    number: body.number
+  })
 
   person.save()
     .then(savedPerson =>
     {
       response.json(savedPerson)
     })
-    .catch(error => {
-      response.status(500).json({ error: 'Internal Server Error' });
-    });
+    .catch(err =>
+    {
+      if (err.name === 'ValidationError')
+      {
+        const errors = Object.values(err.errors).map(error => error.message);
+        return response.status(400).json({ error: errors.join(', ') });
+      } else
+      {
+        return response.status(500).json({ error: 'Internal Server Error' });
+      }
+    })
 })
 
 app.put('/persons/:id', (req, res, next) =>
@@ -107,7 +115,7 @@ app.put('/persons/:id', (req, res, next) =>
     number: body.number
   }
 
-  Person.findByIdAndUpdate(req.params.id, person, { new: true })
+  Person.findByIdAndUpdate(req.params.id, person, { new: true, runValidators: true, context: 'query' })
     .then(updatedPerson =>
     {
       res.json(updatedPerson)
@@ -122,7 +130,10 @@ const errorHandler = (error, request, response, next) => {
 
   if (error.name === 'CastError') {
     return response.status(400).send({ error: 'malformatted id' })
-  } 
+  } else if (error.name === 'ValidationError')
+  {
+    return response.status(400).json({error: error.message})
+  }
 
   next(error)
 }
